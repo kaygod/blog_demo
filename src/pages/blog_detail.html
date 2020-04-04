@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="http://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>    
+    <style>
+        .main{
+            width:1024px;
+            margin:20px auto;
+            display: none;
+        }
+        .mid{
+            text-align: center;
+        }
+        .des{
+            margin-top:10px;
+        }
+        .marginRight{
+            margin-right:10px;
+        }
+        .content{
+            margin-top:40px;
+        }
+        .mask{
+            position: fixed;
+            top:0;
+            left:0;
+            right:0;
+            bottom:0;
+            display: none;
+        }
+        .update-box{
+            position: absolute;
+            left:50%;
+            transform: translateX(-50%);
+            margin-top:100px;
+            width:200px;
+            height:200px;
+            background-color: #fff;
+            text-align: center;
+        }
+        .text{
+            width:200px;
+            height:150px;
+        }
+
+    </style>
+</head>
+<body>
+       
+       <div class="main" id="main">
+
+          <h2 class="mid" id="title"></h2>
+          <p class="mid des">
+              <span class="marginRight" id="username"></span>
+              <span class="marginRight" id="time"></span>
+              <span onclick="edit()">修改</span>
+          </p>
+
+          <div class="content" id="content">
+              博客内容啊
+          </div>
+         
+       </div>
+
+       <div class="mask" id="mask">
+          <div class="update-box">
+              <textarea class="text" id="mask_text"></textarea>
+              <p><button class="marginRight" onclick="editHandler()">修改</button><button onclick="closeBox()">关闭</button></p>
+          </div>
+       </div>
+      
+<script>
+
+    let blog_id;
+
+    function closeBox(){
+        $("#mask").hide();
+    }
+
+    function edit(){
+        $("#mask").show();
+    }
+
+    function notlogin(res){
+        if(res.error_no == 200){
+            window.location.href="/login";
+        }
+    }
+
+    function editHandler(){
+       
+        $.ajax({
+            url:"/api/update",
+            method:"get",
+            dataType:"json",
+            data:{
+                blog_id,
+                content:$("#mask_text").text()
+            },
+            success(res){
+                notlogin(res);
+                if(res.error_no === 0){
+                    location.reload();
+                }
+            }
+        })
+
+    }
+
+    function init(){
+        const url = `/api${location.pathname}`;
+        $.ajax({
+            url,
+            method:"get",
+            data:{},
+            dataType:"json",
+            success(res){
+                notlogin(res);
+                if(res.error_no === 0){
+                    $("#main").show();
+                    const { title,content,time,username,blog_id:b_id } = res.data;
+                    blog_id = b_id;
+                    $("#title").text(title);
+                    $("#content").html(content);
+                    $("#time").text(time);
+                    $("#username").text(username);
+                    $("#mask_text").text(content);
+                }
+            }
+        })
+    }
+
+    $(document).ready(()=>{
+        init();
+    })
+
+</script>
+</body>
+</html>

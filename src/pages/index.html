@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>博客首页</title>
+    <script src="http://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>    
+    <style>
+        
+        .content{
+            margin-top:70px;
+        }
+        .blog{
+            margin-bottom: 30px;
+        }
+        .main{
+            margin:20px auto;
+            width:1024px;
+        }
+        .text{
+            width:300px;
+            height:50px;
+            margin-left:5px;
+        }
+        .title{
+            margin-left:10px;
+        }
+        .current{
+            color:#005aa0;
+        }
+        .page a{
+            margin-right:10px;
+            cursor: pointer;
+        }
+     
+    </style>
+</head>
+<body>
+      <div class="main">
+
+            <div>
+                    <p>博客标题:<input type="text" id="title" class="title"/></p>
+                    <p>博客内容:
+                        <textarea id="content" class="text"></textarea>
+                    </p>
+                    <p><button id="btn">发布</button></p>
+              </div>
+        
+              <div class="content" id="list">
+                    
+                  
+        
+              </div>
+
+              <div class="page" id="page">
+    
+              </div>    
+
+
+      </div>
+    
+      <script>
+
+        let cur_page = 1,total_page = 1;
+        
+        function delItem(blog_id){
+
+            $.ajax({
+                url:"/api/del",
+                method:"get",
+                dataType:"json",
+                data:{
+                    blog_id 
+                },
+                success(res){
+                    notlogin(res);
+                    if(res.error_no === 0){ //删除成功了
+                        window.location.reload();
+                    }   
+                }
+            })
+         
+        }
+
+        function notlogin(res){
+         if(res.error_no == 200){
+            window.location.href="/login";
+         }
+        }
+        
+        /**
+         * 分页函数
+         */
+        function pageHandler(page_no,total_page){
+
+            if(total_page == 1){
+                $("#page").hide();
+                return false;
+            }else{
+                $("#page").html("");
+                $("#page").show();
+            }
+
+            let start_page,end_page;
+
+            if(total_page <= 10){
+                start_page = 1;
+                end_page = total_page;
+            }else if(page_no>=(total_page-10)){
+                start_page = total_page-10;
+                end_page = total_page;
+            }else{
+                start_page = page_no-3;
+                end_page = start_page + 10;
+            }
+
+            let str = "";
+
+            for(let i = start_page;i<=end_page;i++){
+                str+=`
+                  <a onclick="getList(${i})" class="${i==page_no?'current':''}">${i}</a>
+                `;
+            }
+
+            $("#page").html(str);
+
+        }
+
+        function getList(page_no){
+
+            $.ajax({
+                    url:"/api/get_list",
+                    method:"get",
+                    dataType:"json",
+                    xhrFields: {withCredentials: true},
+                    contentType: 'application/json; charset=utf-8',
+                    data:{
+                       page_no
+                    },
+                    success(res){
+                        notlogin(res);
+                        if(res.error_no === 0){
+
+                            const { final_page,msg_list } = res.data;
+
+                            let str = "";
+
+                            msg_list.forEach((item)=>{
+                                str += `
+                                    <div class="blog" >
+                                            <p><a href="/blog/detail/${item.blog_id}">${item.title}</a></p>
+                                            <p>
+                                                <span>${item.user_name}</span>
+                                                <span>${item.time}</span>
+                                                <span onClick="delItem(${item.blog_id})">删除</span>
+                                            </p>
+                                    </div>
+                                `;
+                            })
+
+                            $("#list").html(str)
+
+                            pageHandler(page_no,final_page);
+
+                        }
+                    }
+                })
+
+        }  
+           
+         $(document).ready(()=>{
+
+            $("#btn").click(()=>{
+
+                $.ajax({
+                    url:"/api/add",
+                    method:"get",
+                    dataType:"json",
+                    data:{
+                        content:$("#content").val(),
+                        title:$("#title").val()
+                    },
+                    success(res){
+                        notlogin(res);
+                        if(res.error_no === 0){ //新增成功了
+                           window.location.reload();
+                       }   
+                    }
+                })
+
+            })
+
+            getList(1);
+
+         })
+
+      </script>
+</body>
+</html>
