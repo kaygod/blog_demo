@@ -1,6 +1,8 @@
 const userCtrl =  require("../controller/user");
+const { Fail } = require("../models/Response");
 
-const loginRoute = (req,res) => {
+
+const loginRoute = async (req,res) => {
 
   const { pathname, method,params } = req;
   
@@ -8,11 +10,23 @@ const loginRoute = (req,res) => {
 
     const { username,password } = params;
 
-    const { data,user_key } = userCtrl.login(username,password);
+    const result = await userCtrl.login(username,password);
+
+    if(result instanceof Fail){
+        return result;
+    }
+    
+    const { data,user_key } = result;
 
     res.setHeader("Set-Cookie",`user_key=${user_key}; path=/;`)    
 
     return data;
+
+  }else if(method === "GET" && pathname === "/api/register"){
+
+    const { username,password } = params;
+
+    return userCtrl.register(username,password);
 
   }
 

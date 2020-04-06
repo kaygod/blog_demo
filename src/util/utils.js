@@ -5,6 +5,7 @@ const {salt} =  require("../config/config");
 const { get } = require("../util/_redis");
 const urlHandler = require("url");
 const { Fail } = require("../models/Response");
+const moment = require('moment');
 
 exports.parseUrl = (req,res)=>{
 
@@ -109,7 +110,7 @@ exports.loginInterceptor = (req,res)=>{
 
   const { url,method,session } = req;  
 
-  const whiteList = ["/api/login","/login"];
+  const whiteList = ["/api/login","/login","/api/register"];
 
   const pathname = urlHandler.parse(url).pathname;
 
@@ -125,4 +126,33 @@ exports.loginInterceptor = (req,res)=>{
      }
 
   }
+}
+
+exports.delProp = (data,property = null)=>{
+
+  try {
+    
+   if(property === null){
+      return false;
+   }
+
+   let array = property;
+
+   if(!Array.isArray(property)){
+    array = [property];
+   }
+
+   array.forEach((item)=>{
+      delete data[item];
+   })
+
+  } catch (error) {
+      console.log(error);
+  }
+
+}
+
+
+exports.getDate = (date)=>{
+  return moment(new Date(date)).format('YYYY-MM-DD HH:mm:ss');
 }

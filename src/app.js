@@ -5,6 +5,7 @@ const { parseUrl,sessionHanlder,loginInterceptor } = require("./util/utils");
 const urlHandler = require("url");
 const querystring = require("querystring");
 require("./util/_redis");
+require("./util/_mysql");
 
 const app = async (req, res) => {
 
@@ -32,7 +33,9 @@ const app = async (req, res) => {
 
   initialParams(req);
 
-  if (routeHandler(req,res)) {
+  const result = await routeHandler(req,res);
+
+  if (!result) {
     return false;
   }
 
@@ -40,15 +43,32 @@ const app = async (req, res) => {
 
 }
 
-const routeHandler = (req,res)=>{
+const routeHandler = async (req,res)=>{
 
   const array = [userRoute,blogRoute];
 
   for(let fn of array){
     const result  = fn(req,res)
     if(result){
-      res.json(result);
-      return true;
+
+      if(result instanceof Promise){
+        let data;
+        try {
+          data = await result;
+        } catch (error) {
+          console.log(error);
+        }
+  
+        if(data){
+          res.json(data);
+          return true;
+        }
+
+       }else{
+        res.json(result);
+        return true;    
+       }
+      
     }
   }
 

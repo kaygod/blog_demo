@@ -173,13 +173,22 @@
 
             $("#btn").click(()=>{
 
+                const content = $("#content").val().trim();
+
+                const title = $("#title").val().trim();
+
+                if(content === "" ||  title=== ""){
+                    alert("博客标题和内容不能为空!");
+                    return false;
+                }
+
                 $.ajax({
                     url:"/api/add",
                     method:"get",
                     dataType:"json",
                     data:{
-                        content:$("#content").val(),
-                        title:$("#title").val()
+                        content,
+                        title
                     },
                     success(res){
                         notlogin(res);

@@ -21,12 +21,60 @@
       <div class="main">
             <p>用户名: <input type="text" id="username"/></p>
             <p>密码: <input type="password" id="password" class="marginleft"/></p>
-            <p><button id="btn">登录</button></p>
+            <p><button id="btn">登录</button><button id="register" class="marginleft">注册</button></p>
       </div>
 
       <script>
 
+            function validate(){
+              const username = $("#username").val().trim();
+              const password = $("#password").val().trim();
+
+              if(username && password){
+                  return {
+                        username,
+                        password  
+                  };
+              }else{
+                  alert("用户名和密码不能为空");  
+                  return false;
+              }
+
+            }
+
+            $("#register").on("click",()=>{
+
+                  const data = validate();
+
+                  if(!data){
+                      return false;  
+                  }
+
+                  $.ajax({
+                  type:"get",
+                  url:"/api/register",
+                  data:{
+                        username:data.username,
+                        password:data.password
+                  },
+                  dataType:"json",
+                  success(data){
+                        if(data.error_no === 0){
+                             alert("注册成功!");
+                             window.location.reload();
+                        }else{
+                              alert(data.message);
+                        }
+                   } 
+                  })
+
+            })
+
             $("#btn").on("click",()=>{
+
+                  if(!validate()){
+                      return false;  
+                  }
 
                   $.ajax({
                   type:"get",
@@ -39,6 +87,8 @@
                   success(data){
                         if(data.error_no === 0){
                               window.location.href="/";
+                        }else{
+                              alert(data.message);
                         }
                   } 
                   })

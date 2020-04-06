@@ -8,7 +8,9 @@ const blogRoute = (req) => {
 
     const { title,content } = params;
 
-    return blogCtrl.addOne(title,content);
+    const { user_id } = req.session;
+
+    return blogCtrl.addOne(user_id,content,title);
 
   }else if(method === "GET" && pathname === "/api/get_list"){ //获取博客列表
 
@@ -19,8 +21,10 @@ const blogRoute = (req) => {
   }else if(method === "GET" && pathname === "/api/del"){ //删除博客
     
         const { blog_id } = params;
+
+        const { user_id } = req.session;
     
-        return blogCtrl.delOne(blog_id);
+        return blogCtrl.delOne(user_id,blog_id);
     
   }else if(method === "GET" && pathname.includes("/api/blog/detail/")){ //进入博客详情
     
@@ -32,7 +36,9 @@ const blogRoute = (req) => {
 
         const { blog_id,content } = params;
 
-        return blogCtrl.updateBlog(blog_id,content);
+        const { user_id } = req.session;        
+
+        return blogCtrl.updateBlog(user_id,blog_id,content);
 
   }
 

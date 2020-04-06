@@ -99,12 +99,14 @@
             dataType:"json",
             data:{
                 blog_id,
-                content:$("#mask_text").text()
+                content:$("#mask_text").val()
             },
             success(res){
                 notlogin(res);
                 if(res.error_no === 0){
                     location.reload();
+                }else{
+                     alert(data.message);
                 }
             }
         })
@@ -122,13 +124,16 @@
                 notlogin(res);
                 if(res.error_no === 0){
                     $("#main").show();
-                    const { title,content,time,username,blog_id:b_id } = res.data;
+                    const { title,content,time,user_name,blog_id:b_id } = res.data;
                     blog_id = b_id;
                     $("#title").text(title);
                     $("#content").html(content);
                     $("#time").text(time);
-                    $("#username").text(username);
+                    $("#username").text(user_name);
                     $("#mask_text").text(content);
+                }
+                else{
+                     alert(data.message);
                 }
             }
         })
