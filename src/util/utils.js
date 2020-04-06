@@ -6,6 +6,7 @@ const { get } = require("../util/_redis");
 const urlHandler = require("url");
 const { Fail } = require("../models/Response");
 const moment = require('moment');
+const { readLogger } = require("../util/readLogger");
 
 exports.parseUrl = (req,res)=>{
 
@@ -23,6 +24,10 @@ exports.parseUrl = (req,res)=>{
           pagePath =  path.join(__dirname,`../pages/index.html`);
         }else if(url.includes("/blog/detail/")){
           pagePath =  path.join(__dirname,`../pages/blog_detail.html`);          
+        }else if(url === "/log"){
+          pagePath =  path.join(__dirname,`../log/access.log`);
+          readLogger(pagePath,res,resolve,reject);
+          return false;
         }
         else{
           pagePath = path.join(__dirname,`../pages/${url.slice(1)}.html`)
@@ -110,7 +115,7 @@ exports.loginInterceptor = (req,res)=>{
 
   const { url,method,session } = req;  
 
-  const whiteList = ["/api/login","/login","/api/register"];
+  const whiteList = ["/api/login","/login","/api/register","/log"];
 
   const pathname = urlHandler.parse(url).pathname;
 
@@ -144,7 +149,7 @@ exports.delProp = (data,property = null)=>{
 
    array.forEach((item)=>{
       delete data[item];
-   })
+   })  
 
   } catch (error) {
       console.log(error);

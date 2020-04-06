@@ -6,6 +6,7 @@ const urlHandler = require("url");
 const querystring = require("querystring");
 require("./util/_redis");
 require("./util/_mysql");
+const { logger } = require("./util/logger");
 
 const app = async (req, res) => {
 
@@ -35,7 +36,8 @@ const app = async (req, res) => {
 
   const result = await routeHandler(req,res);
 
-  if (!result) {
+  if (result) {
+    logger(req,result);
     return false;
   }
 
@@ -61,12 +63,12 @@ const routeHandler = async (req,res)=>{
   
         if(data){
           res.json(data);
-          return true;
+          return data;
         }
 
        }else{
         res.json(result);
-        return true;    
+        return result;    
        }
       
     }
